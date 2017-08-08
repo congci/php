@@ -58,8 +58,11 @@ class Pipeline
                 //如果注册的中间件是个回调、则直接执行
                 if ($pipe instanceof Closure) {
                     return $pipe($passable, $stack);
+                }elseif(!is_object($pipe)){
+                    $pipe = new \middleware\Check;
+                    $parameters = [$passable,$stack];
                 }
-                return $pipe->{$this->method}();
+                return $pipe->{$this->method}(...$parameters);
             };
         };
     }

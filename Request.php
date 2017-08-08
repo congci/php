@@ -15,6 +15,8 @@ class Request
     protected $headerArr;
     protected $content;
     protected $procotol;
+    protected $class;
+    protected $method;
 
 
     public function __construct()

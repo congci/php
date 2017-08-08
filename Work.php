@@ -26,13 +26,11 @@ class Work
                 ->through($this->midelware)
                 ->then(Route::getInstance()->dispatch());
 
-
             $code = 200;
         }catch (\Exception $e){
             $code = 502;
         }
         $response = new Response();
-        //set response
         $sendContent = $response->setResponse($data,$code);
         yield from write($socket,$sendContent);
         fclose($socket);

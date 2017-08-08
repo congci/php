@@ -10,6 +10,13 @@ class Test
         return 'hello word';
     }
 
+
+    /**
+     *  模拟代码
+     *  未实现
+     * @param Request $request
+     * @return mixed
+     */
     public function getData(Request $request){
         $user_id = $request->only(['user_id']);
         $mysql = new mysql();

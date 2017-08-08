@@ -3,7 +3,9 @@
 
 Route::get('/','Api\Test@index');
 Route::group(
-    ['middleware' => []],
+    ['middleware' => [
+      'middleware\Check'
+    ]],
     function(){
         Route::get('/index','Api\Test@index');
     }

@@ -9,6 +9,7 @@ class Route
     private static $instance;
     protected  static $data = [];
     protected $middleware = [];
+    protected static $middlePart = [];
 
     protected $method = [
         'GET',
@@ -66,6 +67,7 @@ class Route
 
 
     protected static function addRoute($reMethod,$path,$fileMethod,$middleware = []){
+        $middleware = $middleware + self::$middlePart;
         if(!$classMethod = self::slice($fileMethod)){
             return false;
         }
@@ -111,17 +113,23 @@ class Route
     private function middleRoute($route,$request){
         //执行中间件
         $middleware = $route['middleware'] + $this->middleware;
-        return  (new Pipeline())->send($request)
+        return  (new Pipeline())
+            ->send($request)
             ->through($middleware)
-            ->then($this->exec($route));
+            ->then($this->exec());
 
     }
 
-    protected function exec($route){
-        return function($request) use ($route){
-            $class = $route['class'];
+    /**
+     * exec
+     * @param $route
+     * @return Closure
+     */
+    protected function exec(){
+        return function($request){
+            $class = $request->class;
             $ref = new  ReflectionClass($class);
-            if(!$ref->getMethod($route['method'])->isStatic()){
+            if(!$ref->getMethod($request->method)->isStatic()){
                 $class = new app\Controller\Api\Test;
             }
             return call_user_func(array($class,'index'),$request);
@@ -131,19 +139,19 @@ class Route
     /**
      * @param $plug
      * @param $func
+     * 因为是依次执行
      */
     public static function group($plug,$func){
         if(is_array($plug)){
             if(isset($plug['middleware'])){
-                $middleware = $plug['middleware'];
+                self::$middlePart = $plug['middleware'];
             }
         }
-
-        $func($middleware = []);
+        if($func instanceof Closure){
+            $func();
+        }
+        self::$middlePart = [];
     }
-
-
-
 
 
 
