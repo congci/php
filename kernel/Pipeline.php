@@ -3,6 +3,7 @@
 
 namespace kernel;
 use Closure;
+use ReflectionClass;
 
 class Pipeline
 {
@@ -60,7 +61,10 @@ class Pipeline
                 if ($pipe instanceof Closure) {
                     return $pipe($passable, $stack);
                 }elseif(!is_object($pipe)){
-                    $pipe = new \middleware\Check;
+                    $class = new ReflectionClass($pipe);
+                    $pipe = $class->newInstanceArgs();
+                    $parameters = [$passable,$stack];
+                }else{
                     $parameters = [$passable,$stack];
                 }
                 return $pipe->{$this->method}(...$parameters);

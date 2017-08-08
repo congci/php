@@ -13,7 +13,7 @@ class Route
 {
     protected  static $data = [];
     protected $middleware = [];
-    protected  $middlePart = [];
+    protected  static $middlePart = [];
 
     protected $method = [
         'GET',
@@ -63,7 +63,7 @@ class Route
 
 
     protected function addRoute($reMethod,$path,$fileMethod,$middleware = []){
-        $middleware = $middleware + $this->middlePart;
+        $middleware = $middleware + self::$middlePart;
         if(!$classMethod = self::slice($fileMethod)){
             return false;
         }
@@ -142,13 +142,13 @@ class Route
     public function group($plug,$func){
         if(is_array($plug)){
             if(isset($plug['middleware'])){
-                $this->middlePart = $plug['middleware'];
+                self::$middlePart = $plug['middleware'];
             }
         }
         if($func instanceof Closure){
-            $func();
+            $func($this);
         }
-        $this->middlePart = [];
+        self::$middlePart = [];
     }
 
 
