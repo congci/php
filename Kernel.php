@@ -372,10 +372,28 @@ class Kernel{
 
     }
 
+    /**
+     * info set class alias
+     */
+    public function setClassAlias(){
+        $alias = array_flip(config_item('alias'));
+        if(!$alias){
+            return false;
+        }
+        foreach ($alias as $key=>$v){
+            class_alias($key,$v);
+        }
+    }
+
     public function __construct()
     {
+
+
         //加载配置和路由
         $this->loadConfig();
+        //设置别名
+        $this->setClassAlias();
+        //路由
         $this->loadRoute();
 
     }

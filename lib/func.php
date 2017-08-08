@@ -41,7 +41,7 @@ function waitForWrite($socket) {
 
 
 if(!function_exists('config_item')){
-    function config_item($name){
+    function config_item($name = null){
         if(!$name){
             return (new Config)->getAll();
         }

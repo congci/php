@@ -21,15 +21,24 @@ class Config
     public function requires(){
         self::$data = [];
         foreach (glob('config/*.php') as $v){
-             self::$data += require $v;
+            $name = $this->getFileName($v);
+            $arr[$name] = require $v;
+             self::$data += $arr;
         }
+
         $serves = [];
         foreach (glob($this->serverFile) as $v){
-            $serves += parse_ini_file($v,true) ;
+            $serves += parse_ini_file($v,true);
         }
         self::$data['process']= $serves;
     }
 
+    protected function getFileName($filename){
+        $start = strpos($filename,'/')+1;
+        $end = strpos($filename,'.');
+        $len = $end-$start;
+        return substr($filename,$start,$len);
+    }
     /**
      * info get config
      * @param $name
