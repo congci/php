@@ -20,7 +20,6 @@ class Kernel{
     protected $clildPids;
     protected $logFile = 'app.log';
     protected $pidFile = 'app.pid';
-    protected $pidMaps = [];
     protected $route = null;
     protected $condig = null;
     protected $configData  = [];
@@ -42,6 +41,19 @@ class Kernel{
         $this->registerTicks();
         $this->initServes();
 //        $this->setMasterPid();
+
+        $this->masterLoop();
+
+    }
+
+    /**
+     * 简单设置主进程
+     */
+    protected function masterLoop(){
+        while(1){
+            sleep(1);
+            pcntl_signal_dispatch();
+        }
     }
 
 
@@ -207,37 +219,27 @@ class Kernel{
     protected function initserve($name,$server){
         $serve     = new Server;
         $socket    = $serve->createServe($server);
-        $pid = pcntl_fork();
-        if($pid < 0){
+
+        $num = $server['num'] ?? 1;
+        if($num <= 0){
+            return false;
         }
-        if($pid){
-            //master
-            $this->clildPids[$pid] = [];
-            $this->clildPids[$pid][0] = $pid;
+        //create process
+        while($num--){
+            $childPid = pcntl_fork();
+            if($childPid < 0){
 
-            $this->pidMaps[$name] = $pid;
-        }else{
-            //slave
-            $num = $server['num'] ?? 0;
-            if($num <= 0){
-                return false;
-            }
-            //create process
-            while($num--){
-                $childPid = pcntl_fork();
-                if($childPid < 0){
-
-                } elseif($childPid){
-                    $this->clildPids[$pid][] = $childPid;
-                } elseif($childPid == 0){
-                    //child
-                    $scheduler = new Scheduler;
-                    $scheduler->addTask($serve->serverChild($socket));
-                    $event = new $this->event($scheduler);
-                    $scheduler->run($event);
-                }
+            } elseif($childPid){
+                $this->clildPids[$name] = $childPid;
+            } elseif($childPid == 0){
+                //child
+                $scheduler = new Scheduler;
+                $scheduler->addTask($serve->serverChild($socket));
+                $event = new $this->event($scheduler);
+                $scheduler->run($event);
             }
         }
+
     }
 
 
@@ -295,16 +297,14 @@ class Kernel{
             die();
         }
         if($this->serverName == 'all'){
-            $pids = [];
-            foreach ($this->clildPids as $value){
-                $pids += $value;
-            }
+            $pids = $this->clildPids;
         }else{
-            $pids = $this->clildPids[$this->pidMaps[$this->serverName]];
+            $pids = $this->clildPids[$this->serverName];
         }
         foreach ($pids as $pid){
             posix_kill($pid,SIGINT);
         }
+        exit();
     }
 
     /**
