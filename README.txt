@@ -1,4 +1,7 @@
 2017.8.8
+本框架是利用php的协程协程的异步请求框架、
+
+
 [目录树]
 
 |-app 要写的项目所在目录
@@ -34,14 +37,23 @@
 2、扩展需要posix pcntl
 
 [操作]
-
 1、配置写到config目录里
 2、路由写到route目录里（要启动的服务写到conf文件里）
 3、php index.php 和 php index.php debug ...(此处写别名) 是调试模式 别名是conf文件里的【】里面的
 4、php index.php reload/stop/restart ...(此处写别名) 别名如果不写、默认全部工程
-5、
 
 
+[未完成]
+1、内核未写全
+2、事件livevent的类
+3、定时器的实现
+4、异步tcp、udp请求
+5、异步mysql、redis实现、
+6、其他
+
+[疑惑]
+
+1、异步mysql和redis的可以用swoole实现、但是swoole太全太乱、不是太喜欢、如果不行就直接用PHP写实现、因个人能力不足、这个地方可能copy网上实现
 
 
 
