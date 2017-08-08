@@ -1,10 +1,14 @@
 <?php
-
+use kernel\Task;
+use kernel\Config;
+use kernel\Scheduler;
+use event\Select;
+use event\EventInterface;
 
 function getTaskId() {
     return function(Task $task, Scheduler $scheduler) {
         $task->getTaskId();
-        $scheduler->schedule($task);
+        $scheduler->enqueue($task);
     };
 }
 
@@ -12,26 +16,26 @@ function addTask($coroutine){
     return function(Task $task, Scheduler $scheduler) use ($coroutine){
         $scheduler->addTask($coroutine);
         //重新把这个任务加如到队列中、其实可以放到调度器里面、但是为了灵活、放到此处
-        $scheduler->schedule($task);
+        $scheduler->enqueue($task);
     };
 }
 
 function killTask($tid){
     return function(Task $task, Scheduler $scheduler) use ($tid) {
         $scheduler->killTask($tid);
-        $scheduler->schedule($task);
+        $scheduler->enqueue($task);
     };
 }
 
 function waitForRead($socket) {
-    return function(Task $task, Scheduler $scheduler) use ($socket) {
-        $scheduler->waitForRead($socket, $task);
+    return function(Task $task, Scheduler $scheduler,Select $loop) use ($socket) {
+        $loop->waitForRead($socket, $task);
     };
 }
 
 function waitForWrite($socket) {
-    return function(Task $task, Scheduler $scheduler) use ($socket) {
-        $scheduler->waitForWrite($socket, $task);
+    return function(Task $task, Scheduler $scheduler,Select $loop) use ($socket) {
+        $loop->waitForWrite($socket, $task);
     };
 }
 
@@ -40,13 +44,13 @@ function waitForWrite($socket) {
 if(!function_exists('config_item')){
     function config_item($name){
         if(!$name){
-            return Config::getInstance()->getAll();
+            return (new Config)->getAll();
         }
         static $config;
         if(isset($config[$name])){
             return $config[$name];
         }
-        return Config::getInstance()->get($name);
+        return (new Config)->get($name);
     }
 }
 

@@ -3,25 +3,15 @@
  * info 配置模块
  *
  */
+namespace kernel;
 
 class Config
 {
-    private static $instance;
-    private static $data = []; //配置存储
+
+    private  static $data = []; //配置存储
 
     protected $serverFile = 'config/*.conf';
     protected $normalFile = 'config/*.php';
-
-
-    /**
-     * info 获取单例
-     */
-    public static function getInstance(){
-        if(!self::$instance instanceof self){
-            self::$instance = new self();
-        }
-        return self::$instance;
-    }
 
 
 

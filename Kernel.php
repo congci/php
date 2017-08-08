@@ -1,11 +1,15 @@
 <?php
 
 /**
- * info
+ * info kernel
  * require pcntl、pcntl
  *
- * //内核、兼具对象容器
  */
+
+use kernel\Scheduler;
+use kernel\Config;
+use kernel\Route;
+use kernel\Serve;
 
 
 class Kernel{
@@ -14,13 +18,14 @@ class Kernel{
     protected $starTtime;
     protected $masterPid;
     protected $clildPids;
-    protected $logFile = 'defaultlog.log';
-    protected $pidFile = 'yield.pid';
+    protected $logFile = 'app.log';
+    protected $pidFile = 'app.pid';
     protected $pidMaps = [];
-    protected $routeInstance = null;
-    protected $condigInstance = null;
+    protected $route = null;
+    protected $condig = null;
     protected $configData  = [];
     protected $routeData   = [];
+    protected $event = 'event\Select';
 
 
 
@@ -225,7 +230,8 @@ class Kernel{
                     //child
                     $scheduler = new Scheduler;
                     $scheduler->addTask($serve->serverChild($socket));
-                    $scheduler->run();
+                    $event = new $this->event($scheduler);
+                    $scheduler->run($event);
                 }
             }
         }
@@ -243,16 +249,18 @@ class Kernel{
      * require config
      */
     protected function loadConfig(){
-        Config::getInstance()->requires();
-        $this->configData = Config::getInstance()->getAll();
+        $this->config = new Config();
+        $this->config->requires();
+        $this->configData = $this->config->getAll();
     }
 
     /**
      * info require route
      */
     protected function loadRoute(){
-        Route::getInstance()->requires();
-        $this->routeData = Route::getInstance()->getAll();
+        $this->route = new Route();
+        $this->route->requires();
+        $this->routeData = $this->route->getAll();
     }
 
     /**
@@ -267,14 +275,6 @@ class Kernel{
         }
 
         //每个pid都重启
-
-
-
-
-
-
-
-
 
     }
 
@@ -326,7 +326,8 @@ class Kernel{
         $socket    = $serve->createServe($process);
         $scheduler = new Scheduler;
         $scheduler->addTask($serve->serverChild($socket));
-        $scheduler->run();
+        $event = new $this->event($scheduler);
+        $scheduler->run($event);
     }
 
 
@@ -373,6 +374,7 @@ class Kernel{
 
     public function __construct()
     {
+        //加载配置和路由
         $this->loadConfig();
         $this->loadRoute();
 

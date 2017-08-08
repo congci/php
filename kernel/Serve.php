@@ -6,6 +6,9 @@
  * tcp udp
  *
  */
+namespace kernel;
+use Exception;
+
 
 class Serve{
     protected $process = [

@@ -2,6 +2,7 @@
 /**
  * info response
  */
+namespace kernel;
 
 class Response
 {

@@ -1,6 +1,6 @@
 <?php
 
-
+class_alias('facades\Route','Route');
 Route::get('/','Api\Test@index');
 Route::group(
     ['middleware' => [

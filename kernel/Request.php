@@ -3,6 +3,7 @@
  * info request
  *
  */
+namespace kernel;
 
 class Request
 {
@@ -15,8 +16,8 @@ class Request
     protected $headerArr;
     protected $content;
     protected $procotol;
-    protected $class;
-    protected $method;
+    public $class;
+    public $method;
 
 
     public function __construct()

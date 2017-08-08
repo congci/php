@@ -2,7 +2,9 @@
 /**
  * info 任务
  */
+namespace kernel;
 
+use Generator;
 
 class Task{
 

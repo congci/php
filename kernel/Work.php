@@ -1,5 +1,6 @@
 <?php
 
+namespace kernel;
 
 class Work
 {
@@ -24,7 +25,7 @@ class Work
             $data = (new Pipeline())
                 ->send($request)
                 ->through($this->midelware)
-                ->then(Route::getInstance()->dispatch());
+                ->then((new Route)->dispatch());
 
             $code = 200;
         }catch (\Exception $e){

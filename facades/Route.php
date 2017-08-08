@@ -1,11 +1,11 @@
 <?php
 namespace facades;
 
-class Route
+class Route extends Facades
 {
 
-
-
-
+    public function getInstance(){
+        return 'kernel\Route';
+    }
 
 }

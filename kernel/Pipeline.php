@@ -1,7 +1,8 @@
 <?php
 
 
-
+namespace kernel;
+use Closure;
 
 class Pipeline
 {

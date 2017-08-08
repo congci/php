@@ -3,6 +3,7 @@
 /**
  * Class ThreadPool|线程池
  */
+namespace kernel;
 
 class ConnectPool
 {

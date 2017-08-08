@@ -4,12 +4,17 @@
  *  路由模块
  * Class Route
  */
+namespace kernel;
+use ReflectionClass;
+use Closure;
+use app\Controller\Api\Test;
+
+
 class Route
 {
-    private static $instance;
     protected  static $data = [];
     protected $middleware = [];
-    protected static $middlePart = [];
+    protected  $middlePart = [];
 
     protected $method = [
         'GET',
@@ -17,15 +22,7 @@ class Route
     ];
 
 
-    /**
-     * info 获取单例
-     */
-    public static function getInstance(){
-        if(!self::$instance instanceof self){
-            self::$instance = new self();
-        }
-        return self::$instance;
-    }
+
 
     public function requires(){
         self::$data = [];
@@ -56,18 +53,18 @@ class Route
         return self::$data;
     }
 
-    public static function get($path,$fileMethod,$middleware = []){
-        self::addRoute('GET',$path,$fileMethod,$middleware);
+    public function get($path,$fileMethod,$middleware = []){
+        $this->addRoute('GET',$path,$fileMethod,$middleware);
     }
 
 
-    public static function post($path,$fileMethod,$middleware = []){
-        self::addRoute('POST',$path,$fileMethod,$middleware);
+    public function post($path,$fileMethod,$middleware = []){
+        $this->addRoute('POST',$path,$fileMethod,$middleware);
     }
 
 
-    protected static function addRoute($reMethod,$path,$fileMethod,$middleware = []){
-        $middleware = $middleware + self::$middlePart;
+    protected function addRoute($reMethod,$path,$fileMethod,$middleware = []){
+        $middleware = $middleware + $this->middlePart;
         if(!$classMethod = self::slice($fileMethod)){
             return false;
         }
@@ -94,6 +91,8 @@ class Route
         if(empty($matchRoute)){
             return false;
         }
+        $request->class = $matchRoute['class'];
+        $request->method = $matchRoute['method'];
         return $matchRoute;
     }
 
@@ -130,9 +129,9 @@ class Route
             $class = $request->class;
             $ref = new  ReflectionClass($class);
             if(!$ref->getMethod($request->method)->isStatic()){
-                $class = new app\Controller\Api\Test;
+                $class = new $class;
             }
-            return call_user_func(array($class,'index'),$request);
+            return call_user_func(array($class,$request->method),$request);
         };
     }
 
@@ -141,16 +140,16 @@ class Route
      * @param $func
      * 因为是依次执行
      */
-    public static function group($plug,$func){
+    public function group($plug,$func){
         if(is_array($plug)){
             if(isset($plug['middleware'])){
-                self::$middlePart = $plug['middleware'];
+                $this->middlePart = $plug['middleware'];
             }
         }
         if($func instanceof Closure){
             $func();
         }
-        self::$middlePart = [];
+        $this->middlePart = [];
     }
 
 
