@@ -9,7 +9,7 @@
 use kernel\Scheduler;
 use kernel\Config;
 use kernel\Route;
-use kernel\Serve;
+use kernel\Server;
 
 
 class Kernel{
@@ -25,7 +25,8 @@ class Kernel{
     protected $condig = null;
     protected $configData  = [];
     protected $routeData   = [];
-    protected $event = 'kernel\Event\Select';
+    protected $event = \kernel\Event\Select::class;
+    protected $serverName;
 
 
 
@@ -152,7 +153,7 @@ class Kernel{
     protected function registerTicks()
     {
         // stop
-        pcntl_signal(SIGKILL, array($this, 'signalHandler'), false);
+        pcntl_signal(SIGINT, array($this, 'signalHandler'), false);
         // reload
         pcntl_signal(SIGUSR1, array($this, 'signalHandler'), false);
         // status
@@ -164,7 +165,7 @@ class Kernel{
 
     protected function signalHandler($signo){
         switch ($signo){
-            case SIGKILL :
+            case SIGINT :
                 $this->close();
                 break;
             case SIGUSR1 :
@@ -190,9 +191,11 @@ class Kernel{
      * info start serves
      */
     protected function initServes(){
-        $process = config_item('process');
-        foreach ($process as $k => $v){
-            $this->initserve($k,$v);
+        $servers = config_item('servers');
+        foreach ($servers as $name => $server){
+            if(!empty($server)){
+                $this->initserve($name,$server);
+            }
         }
     }
 
@@ -201,9 +204,9 @@ class Kernel{
      * @param Serve $serve
      * @param $socket
      */
-    protected function initserve($alias,$process){
-        $serve     = new Serve;
-        $socket    = $serve->createServe($process);
+    protected function initserve($name,$server){
+        $serve     = new Server;
+        $socket    = $serve->createServe($server);
         $pid = pcntl_fork();
         if($pid < 0){
         }
@@ -212,10 +215,10 @@ class Kernel{
             $this->clildPids[$pid] = [];
             $this->clildPids[$pid][0] = $pid;
 
-            $this->pidMaps[$alias] = $pid;
+            $this->pidMaps[$name] = $pid;
         }else{
             //slave
-            $num = $process['num'] ?? 0;
+            $num = $server['num'] ?? 0;
             if($num <= 0){
                 return false;
             }
@@ -245,23 +248,6 @@ class Kernel{
 
     }
 
-    /**
-     * require config
-     */
-    protected function loadConfig(){
-        $this->config = new Config();
-        $this->config->requires();
-        $this->configData = $this->config->getAll();
-    }
-
-    /**
-     * info require route
-     */
-    protected function loadRoute(){
-        $this->route = new Route();
-        $this->route->requires();
-        $this->routeData = $this->route->getAll();
-    }
 
     /**
      * info reload
@@ -289,6 +275,11 @@ class Kernel{
         if($this->checkPidFile()){
             die('process had exists');
         }
+
+        if($this->serverName !== 'all'){
+
+
+        }
         return;
     }
 
@@ -303,16 +294,16 @@ class Kernel{
         if($masterPid != posix_getpid()){
             die();
         }
-        if($this->alias == 'all'){
+        if($this->serverName == 'all'){
             $pids = [];
             foreach ($this->clildPids as $value){
                 $pids += $value;
             }
         }else{
-            $pids = $this->clildPids[$this->pidMaps[$this->alias]];
+            $pids = $this->clildPids[$this->pidMaps[$this->serverName]];
         }
         foreach ($pids as $pid){
-            posix_kill($pid,SIGKILL);
+            posix_kill($pid,SIGINT);
         }
     }
 
@@ -320,14 +311,27 @@ class Kernel{
      * info 单一调试
      */
     protected function debug(){
-        $alias = $this->alias == 'all' ? 'tcp' :$this->alias;
-        $process = config_item('process.' . $alias);
-        $serve     = new Serve;
-        $socket    = $serve->createServe($process);
+        $servers = config_item('servers');
+        $server = $this->serverName == 'all' ? array_shift($servers) :$servers[$this->serverName];
+        if(empty($server)){
+            die();
+        }
+        $serve     = new Server;
+        $socket    = $serve->createServe($server);
         $scheduler = new Scheduler;
         $scheduler->addTask($serve->serverChild($socket));
         $event = new $this->event($scheduler);
         $scheduler->run($event);
+    }
+
+    protected function startServerOne(){
+        $servers = config_item('servers');
+        $server = $servers[$this->serverName] ?? 0;
+        if(empty($server)){
+            die();
+        }
+        $this->initserve($this->serverName,$server);
+        exit();
     }
 
 
@@ -339,7 +343,7 @@ class Kernel{
      */
     protected function parseCommond(){
         global $argv;
-        $this->alias = $argv[2] ?? 'all';
+        $this->serverName = $argv[2] ?? 'all';
         if(count($argv) == 1){
             $this->debug();
         }
@@ -372,6 +376,43 @@ class Kernel{
 
     }
 
+
+    public static function shutdownHandler(){
+        echo 1;
+
+    }
+
+    public static function exceptionHandler(){
+
+    }
+
+    public static function errorHandler(){
+
+    }
+
+
+
+    public function __construct()
+    {
+        //加载配置和路由
+        $this->loadConfig();
+        //设置别名
+        $this->setClassAlias();
+        //路由
+        $this->loadRoute();
+        //选择事件方式
+        $this->chooseEvent();
+//        //异常处理
+//        set_exception_handler([$this,'exceptionHandler']);
+//        //错误处理
+//        set_error_handler([$this,'errorHandler']);
+//
+        register_shutdown_function(['Kernel','shutdownHandler']);
+
+
+        //
+    }
+
     /**
      * info set class alias
      */
@@ -385,20 +426,28 @@ class Kernel{
         }
     }
 
-    public function __construct()
-    {
 
-
-        //加载配置和路由
-        $this->loadConfig();
-        //设置别名
-        $this->setClassAlias();
-        //路由
-        $this->loadRoute();
-
+    /**
+     * require config
+     */
+    protected function loadConfig(){
+        $this->config = new Config();
+        $this->config->requires();
+//        $this->configData = $this->config->getAll();
     }
 
+    /**
+     * info require route
+     */
+    protected function loadRoute(){
+        $this->route = new Route();
+        $this->route->requires();
+//        $this->routeData = $this->route->getAll();
+    }
 
+    protected function chooseEvent(){
+        $this->event = config_item('serve')['event'] ?: $this->event;
+    }
 
 
 

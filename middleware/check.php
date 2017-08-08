@@ -1,6 +1,6 @@
 <?php
 /**
- * info 中间键
+ * info 中间件
  */
 namespace middleware;
 

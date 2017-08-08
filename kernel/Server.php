@@ -10,9 +10,9 @@ namespace kernel;
 use Exception;
 
 
-class Serve{
+class Server{
     protected $process = [
-        'protocol' => 'tcp',
+        'type'     => 'tcp',
         'host'     => '127.0.0.1',
         'port'     => '8000',
     ];
@@ -33,9 +33,9 @@ class Serve{
 
     public function createServe($process){
         $process += $this->process;
-        $this->protocol = $process['protocol'];
-        $this->host = $process['host'];
-        $this->port = $process['port'];
+        $this->protocol = $process['type'];
+        $this->host     = $process['host'];
+        $this->port     = $process['port'];
 
         $socket = @stream_socket_server($this->protocol . '://' . $this->host . ':'  . $this->port, $errNo, $errStr);
         if (!$socket) throw new Exception($errStr, $errNo);

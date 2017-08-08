@@ -10,8 +10,9 @@ class Config
 
     private  static $data = []; //配置存储
 
-    protected $serverFile = 'config/*.conf';
-    protected $normalFile = 'config/*.php';
+    protected $serverFile  = 'config/serve.conf';
+    protected $serversFile = 'config/servers/*.conf';
+    protected $normalFile  = 'config/*.php';
 
 
 
@@ -23,18 +24,21 @@ class Config
         foreach (glob('config/*.php') as $v){
             $name = $this->getFileName($v);
             $arr[$name] = require $v;
-             self::$data += $arr;
+            self::$data += $arr;
         }
 
         $serves = [];
-        foreach (glob($this->serverFile) as $v){
-            $serves += parse_ini_file($v,true);
+        foreach (glob($this->serversFile) as $v){
+            $name = $this->getFileName($v,8);
+            $serves[$name] = parse_ini_file($v,true);
         }
-        self::$data['process']= $serves;
+
+        self::$data['servers'] = $serves;
+        self::$data['serve'] = parse_ini_file($this->serverFile);
     }
 
-    protected function getFileName($filename){
-        $start = strpos($filename,'/')+1;
+    protected function getFileName($filename,$first = 0){
+        $start = strpos($filename,'/',$first)+1;
         $end = strpos($filename,'.');
         $len = $end-$start;
         return substr($filename,$start,$len);
