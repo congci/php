@@ -1,6 +1,6 @@
 <?php
 
-namespace facades;
+namespace kernel\Facades;
 
 class Facades
 {

@@ -6,6 +6,8 @@
 
 namespace kernel;
 
+use Generator;
+use SplQueue;
 
 
 class Scheduler
@@ -15,12 +17,12 @@ class Scheduler
     protected $taskMap = []; // taskId => task
 
     public  function __construct(){
-        $this->taskQueue = new \SplQueue();
+        $this->taskQueue = new SplQueue();
     }
 
 
 
-    public function addTask(\Generator $coroutine){
+    public function addTask(Generator $coroutine){
         $tid = ++$this->maxTaskId;
         $task = new Task($tid,$coroutine);
         $this->taskMap[$tid] = $task;

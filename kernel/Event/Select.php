@@ -2,7 +2,7 @@
 /**
  * info PHP自己的stream_select
  */
-namespace event;
+namespace kernel\Event;
 
 use kernel\Scheduler;
 use kernel\Task;
@@ -108,10 +108,8 @@ class Select implements EventInterface
 
     public function loop(){
         if ($this->scheduler->taskQueue->isEmpty()) {
-            echo 1;
             $this->ioPoll(null);
         } else {
-            echo 2;
             $this->ioPoll(0);
         }
 

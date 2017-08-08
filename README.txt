@@ -2,12 +2,13 @@
 [目录树]
 
 |-app 要写的项目所在目录
-|-cache 框架缓存
 |-config 项目配置目录
-|-db 框架数据库
 |-event 框架所用事件模版
-|-facades 门面模式、提供统一接口
 |-kernel 内核目录
+  |-Cache 框架缓存实现源码目录
+  |-Db 框架数据库实现目录
+  |-Facades 门面模式、提供统一接口目录
+  |-Protocol --协议实现目录
   |-Config.php 配置源码
   |-Connetion.php 连接池
   |-Pipleline 管道
@@ -21,7 +22,6 @@
   |-Work
 |-lib 一些库、比如函数
 |-middle --中间件
-|-protocol --协议实现
 |-route-路由配置
 |-autoload 自动加载类
 |-index.php 入口文件

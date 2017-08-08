@@ -2,8 +2,7 @@
 use kernel\Task;
 use kernel\Config;
 use kernel\Scheduler;
-use event\Select;
-use event\EventInterface;
+use kernel\Event\Select;
 
 function getTaskId() {
     return function(Task $task, Scheduler $scheduler) {

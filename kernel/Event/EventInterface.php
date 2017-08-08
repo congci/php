@@ -1,6 +1,6 @@
 <?php
 
-namespace event;
+namespace kernel\Event;
 
 
 interface  EventInterface

@@ -25,7 +25,7 @@ class Kernel{
     protected $condig = null;
     protected $configData  = [];
     protected $routeData   = [];
-    protected $event = 'event\Select';
+    protected $event = 'kernel\Event\Select';
 
 
 
