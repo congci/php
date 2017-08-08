@@ -1,11 +1,12 @@
 <?php
 namespace kernel\Facades;
 
-class Route extends Facades
+
+class Route extends Facade
 {
 
-    public function getInstance(){
-        return 'kernel\Route';
+    public static function getInstance(){
+        return \kernel\Route::class;
     }
 
 }

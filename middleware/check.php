@@ -4,6 +4,8 @@
  */
 namespace middleware;
 
+use Closure;
+
 
 class Check{
 
@@ -12,8 +14,9 @@ class Check{
 
 
 
-    public function handle($request, \Closure $next){
+    public function handle($request, Closure $next){
 
-        return next($request);
+        return 1;
+//        return next($request);
     }
 }
