@@ -1,6 +1,8 @@
 <?php
+namespace kernel\Protocol;
 
-class SocketInstance {
+
+class Socket{
     protected $socket;
 
     public function __construct() {

@@ -1,13 +1,21 @@
 <?php
 
 namespace app\Controller\Api;
+use Tcp;
+
+
 
 
 
 class Test
 {
     public function index(){
-        return 'hello word';
+        return yield 'hello word';
+    }
+
+    public function test(){
+        return yield from Tcp::get('tcp://www.baidu.com:80');
+
     }
 
 

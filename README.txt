@@ -6,10 +6,10 @@
 
 |-app 要写的项目所在目录
 |-config 项目配置目录
-|-event 框架所用事件模版
 |-kernel 内核目录
   |-Cache 框架缓存实现源码目录
   |-Db 框架数据库实现目录
+  |-event 框架所用事件模版
   |-Facades 门面模式、提供统一接口目录
   |-Protocol --协议实现目录
   |-Config.php 配置源码
@@ -49,6 +49,7 @@
                  php index.php debug ...(只能写单一项目服务、如果没有则默认第一个服务项目) 是调试模式 别名是config/servers 下面的文件basename
 
 5、PHP index.php close 全部关闭
+6、控制器的返回必须是 return yield .. 比如 return yield 'hello word';
 
 
 [未完成]

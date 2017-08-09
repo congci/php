@@ -102,7 +102,7 @@ class Route
         return function($request){
             $route = $this->match($request);
             if(!$route){
-                return false;
+               throw new \Exception('error');
             }
             return $this->middleRoute($route,$request);
         };

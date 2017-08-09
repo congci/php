@@ -22,10 +22,11 @@ class Work
         //exec
         try{
             //需要实例化
-            $data = (new Pipeline())
+            $data = yield from (new Pipeline())
                 ->send($request)
                 ->through($this->midelware)
                 ->then((new Route)->dispatch());
+            $data = $data == false ? '' : $data;
 
             $code = 200;
         }catch (\Exception $e){

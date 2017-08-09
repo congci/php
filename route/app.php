@@ -11,6 +11,8 @@ Route::group(
     }
 );
 
+Route::get('/baidu','Api\Test@test');
+
 
 
 

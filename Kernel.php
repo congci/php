@@ -394,13 +394,14 @@ class Kernel{
 
     }
 
-    public static function exceptionHandler(Exception $e){
+    public static function exceptionHandler(\Exception $e){
         //将异常写入到日志
 
     }
 
     public static function errorHandler($code, $description, $file = null, $line = null, $context = null){
         //错误处理\写入日志
+        throw new \Exception ('hah');
 
     }
 
@@ -416,12 +417,13 @@ class Kernel{
         $this->loadRoute();
         //选择事件方式
         $this->chooseEvent();
-        //异常处理
-        set_exception_handler(['Kernel','exceptionHandler']);
-        //错误处理
         set_error_handler(['Kernel','errorHandler']);
-        //关闭处理
-        register_shutdown_function(['Kernel','shutdownHandler']);
+
+//        //异常处理
+        set_exception_handler(['Kernel','exceptionHandler']);
+//        //错误处理
+//        //关闭处理
+//        register_shutdown_function(['Kernel','shutdownHandler']);
 
     }
 
