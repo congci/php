@@ -80,7 +80,7 @@ class Select implements EventInterface
         if(empty($rSocks) && empty($wSocks)){
             return false;
         }
-
+        pcntl_signal_dispatch();
         if(!stream_select($rSocks,$wSocks,$eSocks,$timeout)){
             return false;
         }

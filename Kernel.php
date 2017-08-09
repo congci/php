@@ -35,13 +35,11 @@ class Kernel{
      */
     public function run(){
         $this->checkEnv();
-//        $this->createPidFile();
 //        $this->changeStd();
         $this->parseCommond();
         $this->registerTicks();
         $this->initServes();
-//        $this->setMasterPid();
-
+        $this->setMasterPid();
         $this->masterLoop();
 
     }
@@ -65,7 +63,7 @@ class Kernel{
      */
     protected function createPidFile(){
         if($this->checkPidFile()){
-            die('process has exists');
+            exit('process has exists');
         }
         touch($this->pidFile);
     }
@@ -80,7 +78,7 @@ class Kernel{
     }
 
     protected function readFilepid(){
-        return file_get_content($this->pidFile);
+        return file_get_contents($this->pidFile);
     }
 
 
@@ -112,7 +110,7 @@ class Kernel{
         }
         elseif($pid2 != 0)
         {
-            exit();
+            exit(0);
 
         }
 
@@ -152,7 +150,7 @@ class Kernel{
      */
     public function checkCli(){
         if('cli' !== php_sapi_name()){
-            die('must cli');
+            exit('must cli');
         }
     }
 
@@ -175,10 +173,10 @@ class Kernel{
     }
 
 
-    protected function signalHandler($signo){
+    public function signalHandler($signo){
         switch ($signo){
             case SIGINT :
-                $this->close();
+                $this->signalClose();
                 break;
             case SIGUSR1 :
                 $this->reload();
@@ -259,7 +257,7 @@ class Kernel{
      */
     protected function reload(){
         if(!$this->checkPidFile()){
-            die('there are no process');
+            exit('there are no process');
         }
 
         //每个pid都重启
@@ -275,7 +273,7 @@ class Kernel{
      */
     protected function start(){
         if($this->checkPidFile()){
-            die('process had exists');
+            exit('process had exists');
         }
 
         if($this->serverName !== 'all'){
@@ -293,18 +291,23 @@ class Kernel{
      */
     protected function close(){
         $masterPid = $this->readFilepid();
+        posix_kill($masterPid,SIGINT);
+        exit;
+    }
+
+    //执行信号处理、主进程是发送信号、子进程是退出
+    public function signalClose(){
+        $masterPid = $this->readFilepid();
         if($masterPid != posix_getpid()){
-            die();
+            exit;
         }
-        if($this->serverName == 'all'){
-            $pids = $this->clildPids;
-        }else{
-            $pids = $this->clildPids[$this->serverName];
-        }
-        foreach ($pids as $pid){
+        foreach ($this->clildPids as $pid){
             posix_kill($pid,SIGINT);
         }
-        exit();
+        //回收僵死进程（子进程结束、父进程无法收到结束信息）
+        pcntl_wait($status);
+        unlink($this->pidFile);
+        exit;
     }
 
     /**
@@ -314,7 +317,7 @@ class Kernel{
         $servers = config_item('servers');
         $server = $this->serverName == 'all' ? array_shift($servers) :$servers[$this->serverName];
         if(empty($server)){
-            die();
+            exit();
         }
         $serve     = new Server;
         $socket    = $serve->createServe($server);
@@ -324,11 +327,12 @@ class Kernel{
         $scheduler->run($event);
     }
 
+    //单一开启
     protected function startServerOne(){
         $servers = config_item('servers');
         $server = $servers[$this->serverName] ?? 0;
         if(empty($server)){
-            die();
+            exit();
         }
         $this->initserve($this->serverName,$server);
         exit();
@@ -344,10 +348,7 @@ class Kernel{
     protected function parseCommond(){
         global $argv;
         $this->serverName = $argv[2] ?? 'all';
-        if(count($argv) == 1){
-            $this->debug();
-        }
-
+        $argv[1] = $argv[1] ?? '';
         switch(strtoupper($argv[1])){
             case '' :
             case 'DAEMON':
@@ -378,15 +379,25 @@ class Kernel{
 
 
     public static function shutdownHandler(){
-        echo 1;
+        //写入到日志
+        $ERROR = error_get_last();
+        switch ($ERROR['type']){
+
+
+        }
+
+
+
 
     }
 
-    public static function exceptionHandler(){
+    public static function exceptionHandler(Exception $e){
+        //将异常写入到日志
 
     }
 
-    public static function errorHandler(){
+    public static function errorHandler($code, $description, $file = null, $line = null, $context = null){
+        //错误处理\写入日志
 
     }
 
@@ -402,15 +413,13 @@ class Kernel{
         $this->loadRoute();
         //选择事件方式
         $this->chooseEvent();
-//        //异常处理
-//        set_exception_handler([$this,'exceptionHandler']);
-//        //错误处理
-//        set_error_handler([$this,'errorHandler']);
-//
+        //异常处理
+        set_exception_handler(['Kernel','exceptionHandler']);
+        //错误处理
+        set_error_handler(['Kernel','errorHandler']);
+        //关闭处理
         register_shutdown_function(['Kernel','shutdownHandler']);
 
-
-        //
     }
 
     /**
