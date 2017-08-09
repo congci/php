@@ -37,10 +37,18 @@
 2、扩展需要posix pcntl
 
 [操作]
-1、配置写到config目录里
-2、路由写到route目录里（要启动的服务写到conf文件里）
-3、php index.php 和 php index.php debug ...(此处写别名) 是调试模式 别名是conf文件里的【】里面的
-4、php index.php reload/stop/restart ...(此处写别名) 别名如果不写、默认全部工程
+1、配置写到config目录里（要启动的服务写到conf文件里、config/servers目录下为各个项目的配置、一个conf文件一个配置（务必）。config/serve.conf为服务的基本配置）
+2、路由写到route目录里
+3、
+4、运行的方式：
+         >正常运行（都是守护模式）
+                 php index.php
+                 php index.php daemon 全部启动
+                 php index.php daemon all/...  全部或者单一项目服务
+         >调试运行
+                 php index.php debug ...(只能写单一项目服务、如果没有则默认第一个服务项目) 是调试模式 别名是config/servers 下面的文件basename
+
+5、PHP index.php close 全部关闭
 
 
 [未完成]

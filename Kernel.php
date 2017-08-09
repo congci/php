@@ -202,6 +202,9 @@ class Kernel{
      */
     protected function initServes(){
         $servers = config_item('servers');
+        if($this->serverName){
+            $servers = $servers[$this->serverName];
+        }
         foreach ($servers as $name => $server){
             if(!empty($server)){
                 $this->initserve($name,$server);
