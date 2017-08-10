@@ -15,7 +15,7 @@ class Response
 
     protected $headerArr = [
         'Content-Type'=>'text/html;charset=utf-8;',
-        'Connection' =>'close'
+        'Connection' =>'keep-alive'
     ];
     protected static  $statusTexts = array(
         '100' => 'Continue',
@@ -75,7 +75,7 @@ class Response
         $strlen = strlen($data);
         $this->header = '';
         $headerArr += $this->headerArr;
-        $headrArr['Content-Length'] = $strlen;
+        $headerArr['Content-Length'] = $strlen;
         foreach ($headerArr as $key=>$value){
             $this->header .= $key . ':' . $value . PHP_EOL;
         }

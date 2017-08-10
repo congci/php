@@ -50,8 +50,6 @@ class Scheduler
     }
 
 
-
-
     public function run($event){
         while(1){
             pcntl_signal_dispatch();
@@ -64,7 +62,6 @@ class Scheduler
                     $retval($task, $this,$event);   //因为这里没有把任务再次假如到队列中、需要 retval变量代表的函数把任务再次加入
                     continue;
                 }
-
                 if($task->isFinished()){
                     unset($this->taskMap[$task->getTaskId()]);
                 }else{

@@ -1,5 +1,8 @@
 2017.8.8
 本框架是利用php的协程协程的异步请求框架、
+[状态]
+
+不可用、暂时只能自己写着练手的
 
 
 [目录树]
@@ -49,7 +52,7 @@
                  php index.php debug ...(只能写单一项目服务、如果没有则默认第一个服务项目) 是调试模式 别名是config/servers 下面的文件basename
 
 5、PHP index.php close 全部关闭
-6、控制器的返回必须是 return yield .. 比如 return yield 'hello word';
+6、控制器里面如果有 结果必须是 return yield .. 比如 return yield 'hello word';
 
 
 [未完成]
@@ -59,10 +62,10 @@
 4、异步tcp、udp请求
 5、异步mysql、redis实现、
 6、其他
+7、没有循环获取socket数据、只能接受短数据
 
 [疑惑]
 
-1、异步mysql和redis的可以用swoole实现、但是swoole太全太乱、不是太喜欢、如果不行就直接用PHP写实现、因个人能力不足、这个地方可能copy网上实现
 
 
 

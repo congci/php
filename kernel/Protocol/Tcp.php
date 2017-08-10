@@ -12,11 +12,12 @@ class Tcp extends Socket
     protected $method;
     protected $scheme;
     protected $port;
+    protected $host;
     protected $line;
     protected $header;
     protected $path;
     protected $request;
-    protected $size = 65535;
+    protected $size = 8192;
     protected $uri;
     protected $params = [
 
@@ -28,12 +29,12 @@ class Tcp extends Socket
     protected $schemeMap = [
         'tcp'  => 'tcp',
         'http' => 'tcp',
+        'https'=> 'tcp'
     ];
     protected $headers = [
         'Accept'=>'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
-        'Connection'=>'close',
+        'Connection'=>'keep-alive',
         'Accept-Language'=>'zh-CN,zh;q=0.8,en;q=0.6',
-        'Host' => 'www.w3school.com.cn'
     ];
 
     public function __construct()
@@ -44,6 +45,11 @@ class Tcp extends Socket
     public function createSocket(){
         $this->socket = @stream_socket_client($this->uri, $errNo, $errStr);
         stream_set_blocking($this->socket, 0);
+        if (function_exists('socket_import_stream')) {
+            $raw_socket = socket_import_stream($this->socket);
+            socket_set_option($raw_socket, SOL_SOCKET, SO_KEEPALIVE, 1);
+            socket_set_option($raw_socket, SOL_TCP, TCP_NODELAY, 1);
+        }
         $this->errNo = $errNo;
         $this->errStr = $errStr;
     }
@@ -66,6 +72,7 @@ class Tcp extends Socket
 
 
     protected function setHeader(){
+        $this->headers['Host']  = $this->host;
 
         foreach ($this->headers as $name=>$value){
             $this->header .= $name .':' . $value . PHP_EOL;
@@ -114,10 +121,13 @@ class Tcp extends Socket
         $this->setMethod('GET');
         $this->setLine();
         $this->setHeader();
+
         $this->setRequest();
+
         $this->createSocket();
         yield from $this->write($this->request);
         $data = yield from $this->read($this->size);
+        $this->close();
         $res = new Response();
         $res->parse($data);
         return $res->content;

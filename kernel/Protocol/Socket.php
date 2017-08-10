@@ -18,8 +18,14 @@ class Socket{
         return stream_socket_accept($this->socket, 0);
     }
 
+    protected function getLen($str){
+
+
+    }
+
     public function read($size) {
         yield waitForRead($this->socket);
+
         return fread($this->socket, $size);
     }
 

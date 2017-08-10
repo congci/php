@@ -318,7 +318,7 @@ class Kernel{
      */
     protected function debug(){
         $servers = config_item('servers');
-        $server = $this->serverName == 'all' ? array_shift($servers) :$servers[$this->serverName];
+        $server = !$this->serverName ? array_shift($servers) :$servers[$this->serverName];
         if(empty($server)){
             exit();
         }
@@ -350,7 +350,7 @@ class Kernel{
      */
     protected function parseCommond(){
         global $argv;
-        $this->serverName = $argv[2] ?? 'all';
+        $this->serverName = $argv[2] ?? '';
         $argv[1] = $argv[1] ?? '';
         switch(strtoupper($argv[1])){
             case '' :
@@ -417,10 +417,10 @@ class Kernel{
         $this->loadRoute();
         //选择事件方式
         $this->chooseEvent();
-        set_error_handler(['Kernel','errorHandler']);
-
-//        //异常处理
-        set_exception_handler(['Kernel','exceptionHandler']);
+//        set_error_handler(['Kernel','errorHandler']);
+//
+////        //异常处理
+//        set_exception_handler(['Kernel','exceptionHandler']);
 //        //错误处理
 //        //关闭处理
 //        register_shutdown_function(['Kernel','shutdownHandler']);
