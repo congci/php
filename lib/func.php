@@ -108,4 +108,25 @@ function close($socket) {
     @fclose($socket);
 }
 
+function curl_get($url, $params = [], array $headers = [], array $options = [])
+{
+    if ($params) {
+        $params = http_build_query($params);
+        $url = $url . '?' . $params;
+    }
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+    if ($headers) {
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+    }
+    if ($options) {
+        curl_setopt_array($ch, $options);
+    }
+    $res = curl_exec($ch);
+    $errorNo = curl_errno($ch);
+    $errorMsg = curl_error($ch);
+    curl_close($ch);
+    return ['code' => $errorNo, 'message' => $errorMsg, 'data' => $res];
+}
 

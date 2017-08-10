@@ -32,9 +32,9 @@ class Request
         $this->line = substr($requestString,0,$lnum);
         if($cnum = strpos($requestString,PHP_EOL.PHP_EOL)){
             $this->content = substr($requestString,$cnum);
-            $this->header  = substr($requestString,$lnum,$cnum);
+            $this->header  = substr($requestString,$lnum,$cnum - ($lnum+1));
         }else{
-            $this->header  = substr($requestString,$lnum);
+            $this->header  = substr($requestString,$lnum+1);
         }
         //line
         $this->parseLine();

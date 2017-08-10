@@ -26,7 +26,8 @@ class Work
                 ->send($request)
                 ->through($this->midelware)
                 ->then((new Route)->dispatch());
-            $data = $data == false ? '' : $data;
+
+            $data = $data === false ? '' : $data;
 
             $code = 200;
         }catch (\Exception $e){

@@ -9,8 +9,12 @@ class Response
     protected $line;
     protected $header;
     protected $content;
+    protected $method;
+    protected $status;
+    protected $statusText;
+
     protected $headerArr = [
-        'Content-Type'=>'text/plain',
+        'Content-Type'=>'text/html;charset=utf-8;',
         'Connection' =>'close'
     ];
     protected static  $statusTexts = array(
@@ -65,7 +69,6 @@ class Response
 
     protected function setContent($data){
         $this->content = PHP_EOL . $data;
-
     }
 
     protected function setHeader($data,$headerArr){
@@ -87,6 +90,50 @@ class Response
         $content  = $this->line . PHP_EOL . $this->header . $this->content;
         return $content;
 
+    }
+
+    protected function parseLine(){
+        list($this->method,$this->status,$this->statusText) = explode(' ',$this->line);
+    }
+
+
+    //解析的时候要考虑不同环境的换行
+    public function parse($string){
+        $EOL = '';
+        if(strpos($string,"\r\n")){
+            $EOL = "\r\n";
+        }elseif (strpos($string,"\r")){
+            $EOL = '\r';
+        }elseif(strpos($string,"\n")){
+            $EOL = '\n';
+        }
+        $lnum = strpos($string,$EOL);
+        $this->line = substr($string,0,$lnum);
+        if($cnum = strpos($string,$EOL.$EOL)){
+            $this->content = substr($string,$cnum+2);
+            $this->header  = substr($string,$lnum, $cnum - ($lnum+1));
+        }else{
+            $this->content = '';
+            $this->header  = substr($string,$lnum+1);
+        }
+    }
+
+
+
+    protected function parseHeader(){
+        $headerArr = explode(PHP_EOL,trim($this->header));
+        foreach ($headerArr as $value){
+            list($name,$v) = explode(':',$value,2);
+            $this->headerArr[$name] = $v;
+        }
+    }
+
+
+    public function __get($name)
+    {
+        if(property_exists($this,$name)){
+            return $this->$name;
+        }
     }
 
 

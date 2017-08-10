@@ -14,7 +14,7 @@ class Test
     }
 
     public function test(){
-        return yield from Tcp::get('tcp://www.baidu.com:80');
+        return yield from Tcp::get('http://www.w3school.com.cn/php/func_string_substr.asp:80');
 
     }
 
